@@ -25,6 +25,7 @@ lazy val core = crossProject
   .settings(scalaSettings)
   .settings(testSettings)
   .jsSettings(jsTestSettings)
+  .jvmSettings(mimaSettings)
   .settings(releaseSettings)
 
 lazy val coreJS = core.js
@@ -37,6 +38,7 @@ lazy val enumeratum = crossProject
   .settings(scalaSettings)
   .settings(testSettings)
   .jsSettings(jsTestSettings)
+  .jvmSettings(mimaSettings)
   .settings(releaseSettings)
   .dependsOn(core)
 
@@ -50,6 +52,7 @@ lazy val generic = crossProject
   .settings(scalaSettings)
   .settings(testSettings)
   .jsSettings(jsTestSettings)
+  .jvmSettings(mimaSettings)
   .settings(releaseSettings)
   .dependsOn(core)
 
@@ -63,6 +66,7 @@ lazy val refined = crossProject
   .settings(scalaSettings)
   .settings(testSettings)
   .jsSettings(jsTestSettings)
+  .jvmSettings(mimaSettings)
   .settings(releaseSettings)
   .dependsOn(core)
 
@@ -76,6 +80,7 @@ lazy val spire = crossProject
   .settings(scalaSettings)
   .settings(testSettings)
   .jsSettings(jsTestSettings)
+  .jvmSettings(mimaSettings)
   .settings(releaseSettings)
   .dependsOn(core)
 
@@ -89,6 +94,7 @@ lazy val squants = crossProject
   .settings(scalaSettings)
   .settings(testSettings)
   .jsSettings(jsTestSettings)
+  .jvmSettings(mimaSettings)
   .settings(releaseSettings)
   .dependsOn(core)
 
@@ -307,6 +313,20 @@ lazy val testSettings = Seq(
   )
 )
 
+lazy val mimaSettings = Seq(
+  mimaPreviousArtifacts := {
+    def isReleased = !unreleasedModuleNames.value.contains(moduleName.value)
+    def isPublishing = publishArtifact.value
+
+    latestBinaryCompatibleVersion.value match {
+      case Some(version) if isPublishing && isReleased =>
+        Set(organization.value %% moduleName.value % version)
+      case _ =>
+        Set.empty
+    }
+  }
+)
+
 lazy val jsTestSettings = Seq(
   doctestGenTests := Seq.empty
 )
@@ -460,5 +480,6 @@ addCommandsAlias("validate", List(
   "testsJS/test",
   "coverage",
   "testsJVM/test",
-  "coverageReport"
+  "coverageReport",
+  "mimaReportBinaryIssues"
 ))
